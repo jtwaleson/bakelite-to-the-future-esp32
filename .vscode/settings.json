@@ -8,8 +8,7 @@
     },
     "idf.espIdfPath": "/home/jouke/dev/esp/v5.3.1/esp-idf",
     "idf.openOcdConfigs": [
-        "interface/ftdi/esp32_devkitj_v1.cfg",
-        "target/esp32.cfg"
+        "board/esp32-wrover-kit-3.3v.cfg"
     ],
     "idf.port": "/dev/ttyUSB0",
     "idf.pythonBinPath": "/home/jouke/.espressif/python_env/idf5.3_py3.11_env/bin/python",

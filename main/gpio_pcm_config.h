@@ -7,7 +7,7 @@
 #ifndef __GPIO_PCM_CONFIG_H__
 #define __GPIO_PCM_CONFIG_H__
 
-#define ACOUSTIC_ECHO_CANCELLATION_ENABLE    1
+#define ACOUSTIC_ECHO_CANCELLATION_ENABLE    0
 
 void app_gpio_pcm_io_cfg(void);
 

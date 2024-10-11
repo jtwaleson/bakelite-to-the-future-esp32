@@ -26,6 +26,8 @@
 #include "sys/time.h"
 #include "sdkconfig.h"
 
+#include "driver/gpio.h"
+
 const char *c_hf_evt_str[] = {
     "CONNECTION_STATE_EVT",              /*!< connection state changed event */
     "AUDIO_STATE_EVT",                   /*!< audio connection state change event */
@@ -238,6 +240,11 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
     switch (event) {
         case ESP_HF_CLIENT_CONNECTION_STATE_EVT:
         {
+            if (param->conn_stat.state == 2) {
+                gpio_set_level(26, 1);
+            } else if (param->conn_stat.state == 0) {
+                gpio_set_level(26, 0);
+            }
             ESP_LOGI(BT_HF_TAG, "--connection state %s, peer feats 0x%"PRIx32", chld_feats 0x%"PRIx32,
                     c_connection_state_str[param->conn_stat.state],
                     param->conn_stat.peer_feat,
@@ -250,6 +257,12 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         {
             ESP_LOGI(BT_HF_TAG, "--audio state %s",
                     c_audio_state_str[param->audio_stat.state]);
+            if (param->audio_stat.state == 2 || param->audio_stat.state == 3) {
+                // we draw about 25mA per indicator
+                gpio_set_level(27, 1);
+            } else if (param->audio_stat.state == 0) {
+                gpio_set_level(27, 0);
+            }
     #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
             if (param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED ||
                 param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED_MSBC) {

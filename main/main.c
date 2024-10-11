@@ -25,6 +25,7 @@
 #include "gpio_pcm_config.h"
 #include "esp_console.h"
 #include "app_hf_msg_set.h"
+#include "button_handlers.h"
 
 esp_bd_addr_t peer_addr = {0};
 static char peer_bdname[ESP_BT_GAP_MAX_BDNAME_LEN + 1];
@@ -163,6 +164,9 @@ static void bt_hf_client_hdl_stack_evt(uint16_t event, void *p_param);
 
 void app_main(void)
 {
+    init_button_handlers();
+
+
     char bda_str[18] = {0};
     /* Initialize NVS — it is used to store PHY calibration data */
     esp_err_t ret = nvs_flash_init();
@@ -245,7 +249,7 @@ static void bt_hf_client_hdl_stack_evt(uint16_t event, void *p_param)
     switch (event) {
     case BT_APP_EVT_STACK_UP: {
         /* set up device name */
-        char *dev_name = "ESP_HFP_HF";
+        char *dev_name = "PTT Telefoon v1";
         esp_bt_gap_set_device_name(dev_name);
 
         /* register GAP callback function */

@@ -11,6 +11,7 @@
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
 #include "esp_log.h"
+#include "driver/gpio.h"
 
 extern esp_bd_addr_t peer_addr;
 
