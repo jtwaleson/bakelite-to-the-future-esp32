@@ -27,6 +27,7 @@
 #include "sdkconfig.h"
 
 #include "driver/gpio.h"
+#include "button_handlers.h"
 
 const char *c_hf_evt_str[] = {
     "CONNECTION_STATE_EVT",              /*!< connection state changed event */
@@ -241,9 +242,9 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         case ESP_HF_CLIENT_CONNECTION_STATE_EVT:
         {
             if (param->conn_stat.state == 2) {
-                gpio_set_level(26, 1);
+                gpio_set_level(INDICATOR_1_PIN, 1);
             } else if (param->conn_stat.state == 0) {
-                gpio_set_level(26, 0);
+                gpio_set_level(INDICATOR_1_PIN, 0);
             }
             ESP_LOGI(BT_HF_TAG, "--connection state %s, peer feats 0x%"PRIx32", chld_feats 0x%"PRIx32,
                     c_connection_state_str[param->conn_stat.state],
@@ -258,10 +259,10 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
             ESP_LOGI(BT_HF_TAG, "--audio state %s",
                     c_audio_state_str[param->audio_stat.state]);
             if (param->audio_stat.state == 2 || param->audio_stat.state == 3) {
-                // we draw about 25mA per indicator
-                gpio_set_level(27, 1);
+                // TODO set an interval
+                gpio_set_level(INDICATOR_2_PIN, 1);
             } else if (param->audio_stat.state == 0) {
-                gpio_set_level(27, 0);
+                gpio_set_level(INDICATOR_2_PIN, 0);
             }
     #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
             if (param->audio_stat.state == ESP_HF_CLIENT_AUDIO_STATE_CONNECTED ||
@@ -329,6 +330,11 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         {
             ESP_LOGI(BT_HF_TAG, "--Call setup indicator %s",
                     c_call_setup_str[param->call_setup.status]);
+            if (param->call_setup.status == 1) {
+                gpio_set_level(BUZZER_PIN, 1);
+            } else {
+                gpio_set_level(BUZZER_PIN, 0);
+            }
             break;
         }
 
