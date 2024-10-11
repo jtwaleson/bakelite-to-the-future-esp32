@@ -10,4 +10,6 @@
 #define INDICATOR_2_PIN 32
 #define BUZZER_PIN 26
 
+void start_ringing_timer(void);
+void stop_ringing_timer(void);
 void init_button_handlers(void);

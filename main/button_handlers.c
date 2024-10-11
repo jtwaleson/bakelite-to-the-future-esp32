@@ -1,22 +1,10 @@
-// 5 17 18 23 19 21 22
-#define BUTTON_RED_PIN 19 // yes
-#define BUTTON_WHITE_1_PIN 23 // yes
-#define BUTTON_WHITE_2_PIN 4 // TODO
-#define BUTTON_WHITE_3_PIN 22 //yes     
-#define BUTTON_WHITE_4_PIN 21 // yes
-#define BUTTON_BLACK_PIN 5 // yes
-#define HORN_LIFT_PIN 18 // yes
-
-#define INDICATOR_1_PIN 33
-#define INDICATOR_2_PIN 32
-#define BUZZER_PIN 26
-
 #define MY_TAG "BUTTON_HANDLER"
 
+#include "button_handlers.h"
 #include "driver/gpio.h"
 #include "iot_button.h"
 #include "esp_log.h"
-
+#include "esp_hf_client_api.h"
 
 static void red_button_single_release_cb(void *arg,void *usr_data)
 {
@@ -75,11 +63,32 @@ static void black_button_single_release_cb(void *arg,void *usr_data)
 static void horn_lift_button_slam_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_SLAM");
+    esp_hf_client_reject_call();
 }
 static void horn_lift_button_lift_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_LIFT");
+    // TODO set a timer to accept or auto reject if slammed
+    esp_hf_client_answer_call();
 }
+
+// static TaskHandle_t ringing_timer_handle = NULL;
+// static void ringing_timer_cb(void *arg) {
+//     gpio_set_level(BUZZER_PIN, 1);
+//     vTaskDelay(pdMS_TO_TICKS(300));
+//     gpio_set_level(BUZZER_PIN, 0);
+// }
+// static void start_ringing_timer(void) {
+//     xTaskCreate(ringing_timer_cb, "RingingTimer", 2048, NULL, 5, &ringing_timer_handle);
+// }
+// static void stop_ringing_timer(void) {
+//     if (ringing_timer_handle) {
+//         vTaskDelete(ringing_timer_handle);
+//         ringing_timer_handle = NULL;
+//     }
+// }
+
+
 
 
 void init_button_handlers() {
@@ -135,7 +144,3 @@ void init_button_handlers() {
     gpio_set_direction(BUZZER_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(BUZZER_PIN, 0);
 }
-
-
-
-// function
