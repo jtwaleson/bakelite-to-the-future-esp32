@@ -331,9 +331,9 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
             ESP_LOGI(BT_HF_TAG, "--Call setup indicator %s",
                     c_call_setup_str[param->call_setup.status]);
             if (param->call_setup.status == 1) {
-                // start_ringing_timer();
+                start_ringing_timer();
             } else {
-                // stop_ringing_timer();
+                stop_ringing_timer();
             }
             break;
         }

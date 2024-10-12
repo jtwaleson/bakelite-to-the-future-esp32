@@ -5,6 +5,8 @@
 #include "iot_button.h"
 #include "esp_log.h"
 #include "esp_hf_client_api.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 static void red_button_single_release_cb(void *arg,void *usr_data)
 {
@@ -68,25 +70,30 @@ static void horn_lift_button_slam_cb(void *arg,void *usr_data)
 static void horn_lift_button_lift_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_LIFT");
+    stop_ringing_timer();
     // TODO set a timer to accept or auto reject if slammed
     esp_hf_client_answer_call();
 }
 
-// static TaskHandle_t ringing_timer_handle = NULL;
-// static void ringing_timer_cb(void *arg) {
-//     gpio_set_level(BUZZER_PIN, 1);
-//     vTaskDelay(pdMS_TO_TICKS(300));
-//     gpio_set_level(BUZZER_PIN, 0);
-// }
-// static void start_ringing_timer(void) {
-//     xTaskCreate(ringing_timer_cb, "RingingTimer", 2048, NULL, 5, &ringing_timer_handle);
-// }
-// static void stop_ringing_timer(void) {
-//     if (ringing_timer_handle) {
-//         vTaskDelete(ringing_timer_handle);
-//         ringing_timer_handle = NULL;
-//     }
-// }
+static TaskHandle_t ringing_timer_handle = NULL;
+static void ringing_timer_cb(void *arg) {
+    for (;;) {
+        gpio_set_level(BUZZER_PIN, 1);
+        vTaskDelay(pdMS_TO_TICKS(300));
+        gpio_set_level(BUZZER_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(700));
+    }
+}
+void start_ringing_timer(void) {
+    xTaskCreate(ringing_timer_cb, "RingingTimer", 2048, NULL, 5, &ringing_timer_handle);
+}
+void stop_ringing_timer(void) {
+    if (ringing_timer_handle) {
+        vTaskDelete(ringing_timer_handle);
+        ringing_timer_handle = NULL;
+    }
+    gpio_set_level(BUZZER_PIN, 0);
+}
 
 
 

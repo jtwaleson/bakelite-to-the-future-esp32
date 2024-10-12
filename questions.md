@@ -2,14 +2,17 @@
 * [x] Add a slammer button
 * [x] Get sound output working
 * [x] Hook up buzzer via mosfet?
-* [ ] Proper wiring
+* [x] Proper wiring
+* [ ] Proper volume from speaker
+* [ ] Missing screw
+* [ ] Add rotary detector
+* [ ] Rotary connector
 * [ ] Get microphone input working
 * [ ] prevent default echoing (if needed?)
-* [ ] Create timer framework
-* [ ] Add battery
+* [x] Create timer framework
+* [x] Add battery
 * [ ] Add battery indicator
-* [ ] Hook up all buttons
-* [ ] Add rotary detector
+* [x] Hook up all buttons
 * [ ] Figure out interface (buttons, slammer, )
 * [ ] Add "Operator" sound
 * [ ] Add chatgpt integration? Talk to GPT-4o
