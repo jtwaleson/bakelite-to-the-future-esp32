@@ -4,9 +4,9 @@
 * [x] Hook up buzzer via mosfet?
 * [x] Proper wiring
 * [ ] Proper volume from speaker
-* [ ] Missing screw
-* [ ] Add rotary detector
-* [ ] Rotary connector
+* [x] Missing screw
+* [x] Add rotary detector
+* [x] Rotary connector
 * [ ] Get microphone input working
 * [ ] prevent default echoing (if needed?)
 * [x] Create timer framework
@@ -16,7 +16,8 @@
 * [ ] Figure out interface (buttons, slammer, )
 * [ ] Add "Operator" sound
 * [ ] Add chatgpt integration? Talk to GPT-4o
-
+* [ ] who makes the bluetooth connection?
+* [ ] debounce horn lift
 
 
 ## Questions
