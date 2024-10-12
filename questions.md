@@ -3,11 +3,12 @@
 * [x] Get sound output working
 * [x] Hook up buzzer via mosfet?
 * [x] Proper wiring
-* [ ] Proper volume from speaker
+* [x] Proper volume from speaker
 * [x] Missing screw
 * [x] Add rotary detector
 * [x] Rotary connector
-* [ ] Get microphone input working
+* [x] Get microphone input working
+* [ ] Why is there so much distortion? oscilloscope time
 * [ ] prevent default echoing (if needed?)
 * [x] Create timer framework
 * [x] Add battery

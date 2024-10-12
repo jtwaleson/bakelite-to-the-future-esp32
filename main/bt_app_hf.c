@@ -242,8 +242,10 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         case ESP_HF_CLIENT_CONNECTION_STATE_EVT:
         {
             if (param->conn_stat.state == 2) {
+                ESP_LOGI("JOUKE", "CONNECTION_STATE_EVT: CONNECTED");
                 gpio_set_level(INDICATOR_1_PIN, 1);
             } else if (param->conn_stat.state == 0) {
+                ESP_LOGI("JOUKE", "CONNECTION_STATE_EVT: DISCONNECTED");
                 gpio_set_level(INDICATOR_1_PIN, 0);
             }
             ESP_LOGI(BT_HF_TAG, "--connection state %s, peer feats 0x%"PRIx32", chld_feats 0x%"PRIx32,
@@ -260,8 +262,10 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
                     c_audio_state_str[param->audio_stat.state]);
             if (param->audio_stat.state == 2 || param->audio_stat.state == 3) {
                 // TODO set an interval
+                ESP_LOGI("JOUKE", "AUDIO_STATE_EVT: CONNECTED");
                 gpio_set_level(INDICATOR_2_PIN, 1);
             } else if (param->audio_stat.state == 0) {
+                ESP_LOGI("JOUKE", "AUDIO_STATE_EVT: DISCONNECTED");
                 gpio_set_level(INDICATOR_2_PIN, 0);
             }
     #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
