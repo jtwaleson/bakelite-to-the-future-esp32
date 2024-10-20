@@ -22,40 +22,40 @@ static void red_button_single_click_cb(void *arg,void *usr_data)
 static void white_1_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_1_BUTTON_SINGLE_CLICK");
-    gpio_set_level(INDICATOR_1_PIN, 1);
+    gpio_set_level(BUZZER_PIN, 1);
 }
 static void white_1_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_1_BUTTON_SINGLE_RELEASE");
-    gpio_set_level(INDICATOR_1_PIN, 0);
+    gpio_set_level(BUZZER_PIN, 0);
 }
 static void white_2_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_2_BUTTON_SINGLE_CLICK");
-    gpio_set_level(INDICATOR_2_PIN, 1);
+    esp_hf_client_dial("0000000000");
 }
 static void white_2_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_2_BUTTON_SINGLE_RELEASE");
-    gpio_set_level(INDICATOR_2_PIN, 0);
 }
 static void white_3_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_3_BUTTON_SINGLE_CLICK");
-    gpio_set_level(BUZZER_PIN, 1);
+    esp_hf_client_dial("0000000000");
 }
 static void white_3_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_3_BUTTON_SINGLE_RELEASE");
-    gpio_set_level(BUZZER_PIN, 0);
 }
 static void white_4_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_4_BUTTON_SINGLE_CLICK");
+    esp_hf_client_start_voice_recognition();
 }
 static void white_4_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_4_BUTTON_SINGLE_RELEASE");
+    esp_hf_client_stop_voice_recognition();
 }
 static void black_button_single_click_cb(void *arg,void *usr_data)
 {
