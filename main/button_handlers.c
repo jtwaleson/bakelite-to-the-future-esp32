@@ -119,6 +119,14 @@ void stop_ringing_timer(void) {
 }
 
 
+static void internal_led_timer_cb(void *arg) {
+    for (;;) {
+        gpio_set_level(INTERNAL_LED_PIN, 1);
+        vTaskDelay(pdMS_TO_TICKS(500));
+        gpio_set_level(INTERNAL_LED_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
 
 
 void init_button_handlers() {
@@ -188,4 +196,10 @@ void init_button_handlers() {
     // set out gpio output for buzzer
     gpio_set_direction(BUZZER_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(BUZZER_PIN, 0);
+    // set out gpio output for internal led
+    gpio_set_direction(INTERNAL_LED_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(INTERNAL_LED_PIN, 0);
+
+
+    xTaskCreate(internal_led_timer_cb, "InternalLedTimer", 2048, NULL, 5, NULL);
 }

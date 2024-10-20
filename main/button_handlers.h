@@ -13,6 +13,7 @@
 #define INDICATOR_2_PIN 32
 #define BUZZER_PIN 26
 
+#define INTERNAL_LED_PIN 5
 
 void start_ringing_timer(void);
 void stop_ringing_timer(void);

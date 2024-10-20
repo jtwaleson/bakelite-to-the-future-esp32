@@ -13,7 +13,7 @@
 #define GPIO_OUTPUT_PCM_FSYNC (12)
 #define GPIO_OUTPUT_PCM_CLK_OUT (13)
 #define GPIO_OUTPUT_PCM_DOUT (14)
-#define GPIO_INPUT_PCM_DIN (34) // TODO connect this
+#define GPIO_INPUT_PCM_DIN (15)
 
 #define GPIO_OUTPUT_PCM_PIN_SEL ((1ULL << GPIO_OUTPUT_PCM_FSYNC) | (1ULL << GPIO_OUTPUT_PCM_CLK_OUT) | (1ULL << GPIO_OUTPUT_PCM_DOUT))
 
@@ -44,7 +44,7 @@ void app_gpio_pcm_io_cfg(void)
     // set as input mode
     io_conf.mode = GPIO_MODE_INPUT;
     // enable pull-up mode
-    io_conf.pull_up_en = 0;
+    io_conf.pull_up_en = 0; // setting this to 1 doesnt work
     io_conf.pull_down_en = 0;
     // configure GPIO with the given settings
     gpio_config(&io_conf);
