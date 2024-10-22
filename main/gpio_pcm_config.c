@@ -10,8 +10,8 @@
 #include "gpio_pcm_config.h"
 #include "esp_rom_gpio.h"
 
-#define GPIO_OUTPUT_PCM_FSYNC (12)
-#define GPIO_OUTPUT_PCM_CLK_OUT (13)
+#define GPIO_OUTPUT_PCM_FSYNC (13)
+#define GPIO_OUTPUT_PCM_CLK_OUT (12)
 #define GPIO_OUTPUT_PCM_DOUT (14)
 #define GPIO_INPUT_PCM_DIN (15)
 
