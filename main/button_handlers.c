@@ -18,8 +18,8 @@ static uint8_t phone_number_current_writing = 0;
 
 
 extern esp_bd_addr_t peer_addr;
-esp_bd_addr_t laptop_addr = CONFIG_BAKELITE_LAPTOP_MAC;
-esp_bd_addr_t phone_addr = CONFIG_BAKELITE_PHONE_MAC;
+esp_bd_addr_t laptop_addr = BAKELITE_LAPTOP_MAC;
+esp_bd_addr_t phone_addr = BAKELITE_PHONE_MAC;
 
 static void add_digit_to_dialing(uint8_t digit) {
     if (phone_number_current_writing > 15) {

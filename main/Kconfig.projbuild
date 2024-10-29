@@ -6,14 +6,4 @@ menu "Bakelite Bluetooth Phone Config"
         help
             This enables the Secure Simple Pairing. If disable this option,
             Bluedroid will only support Legacy Pairing
-    config BAKELITE_PHONE_MAC
-        string "Mac address of the phone"
-        default ""
-        help
-            Mac address of the phone that we'll try to connect to
-    config BAKELITE_LAPTOP_MAC
-        string "Mac address of the laptop"
-        default ""
-        help
-            Mac address of the laptop that we'll try to connect to
 endmenu
