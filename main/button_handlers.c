@@ -18,6 +18,7 @@ static uint8_t phone_number_current_writing = 0;
 
 
 extern esp_bd_addr_t peer_addr;
+// provide env vars like BAKELITE_PHONE_MAC="{0x11, 0x11, 0x11, 0x11, 0x11, 0x11}"   
 esp_bd_addr_t laptop_addr = BAKELITE_LAPTOP_MAC;
 esp_bd_addr_t phone_addr = BAKELITE_PHONE_MAC;
 
