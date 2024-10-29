@@ -10,13 +10,12 @@
 #include "gpio_pcm_config.h"
 #include "esp_rom_gpio.h"
 
-#define GPIO_OUTPUT_PCM_FSYNC (13)
+#define GPIO_OUTPUT_PCM_FSYNC (14)
 #define GPIO_OUTPUT_PCM_CLK_OUT (12)
-#define GPIO_OUTPUT_PCM_DOUT (14)
-#define GPIO_INPUT_PCM_DIN (15)
+#define GPIO_OUTPUT_PCM_DOUT (15)
+#define GPIO_INPUT_PCM_DIN (13)
 
 #define GPIO_OUTPUT_PCM_PIN_SEL ((1ULL << GPIO_OUTPUT_PCM_FSYNC) | (1ULL << GPIO_OUTPUT_PCM_CLK_OUT) | (1ULL << GPIO_OUTPUT_PCM_DOUT))
-
 #define GPIO_INPUT_PCM_PIN_SEL (1ULL << GPIO_INPUT_PCM_DIN)
 
 void app_gpio_pcm_io_cfg(void)
@@ -52,6 +51,7 @@ void app_gpio_pcm_io_cfg(void)
     /// matrix out | in the internal PCM signals to the GPIOs
     esp_rom_gpio_connect_out_signal(GPIO_OUTPUT_PCM_FSYNC, PCMFSYNC_OUT_IDX, false, false);
     esp_rom_gpio_connect_out_signal(GPIO_OUTPUT_PCM_CLK_OUT, PCMCLK_OUT_IDX, false, false);
+
     esp_rom_gpio_connect_out_signal(GPIO_OUTPUT_PCM_DOUT, PCMDOUT_IDX, false, false);
     esp_rom_gpio_connect_in_signal(GPIO_INPUT_PCM_DIN, PCMDIN_IDX, false);
 }

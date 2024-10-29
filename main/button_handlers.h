@@ -18,3 +18,4 @@
 void start_ringing_timer(void);
 void stop_ringing_timer(void);
 void init_button_handlers(void);
+static void startup_buzz(void *arg);
