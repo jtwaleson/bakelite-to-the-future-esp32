@@ -16,15 +16,46 @@ static uint8_t rotary_tick_count = 0;
 static uint8_t phone_number_dialing[16];
 static uint8_t phone_number_current_writing = 0;
 
+static TaskHandle_t dialing_handle = NULL;
+static uint8_t amount_of_ticks_left = 0;
+static TaskHandle_t pickup_handle = NULL;
 
 extern esp_bd_addr_t peer_addr;
 // provide env vars like BAKELITE_PHONE_MAC="{0x11, 0x11, 0x11, 0x11, 0x11, 0x11}"   
 esp_bd_addr_t laptop_addr = BAKELITE_LAPTOP_MAC;
 esp_bd_addr_t phone_addr = BAKELITE_PHONE_MAC;
 
+static void clear_dialing_number() {
+    phone_number_current_writing = 0;
+    for (int i = 0; i < sizeof(phone_number_dialing)/sizeof(phone_number_dialing[0]); i++) {
+        phone_number_dialing[i] = 0;
+    }
+}
+static void start_dialing_routine(void *arg) {
+    while (amount_of_ticks_left > 0) {
+        gpio_set_level(INDICATOR_2_PIN, 1);
+        vTaskDelay(pdMS_TO_TICKS(300));
+        gpio_set_level(INDICATOR_2_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(300));
+        amount_of_ticks_left--;
+    }
+    clear_dialing_number();
+    dialing_handle = NULL;
+    vTaskDelete(NULL);
+}
 static void add_digit_to_dialing(uint8_t digit) {
+    amount_of_ticks_left = 15;
+    if (!dialing_handle) {
+        xTaskCreate(start_dialing_routine, "DialingNumbers", 2048, NULL, configMAX_PRIORITIES - 3, &dialing_handle);
+    }
     if (phone_number_current_writing > 15) {
         ESP_LOGE("DIALER", "PHONE NUMBER TOO BIG");
+        amount_of_ticks_left = 0;
+        if (!dialing_handle) {
+            vTaskDelete(dialing_handle);
+            dialing_handle = NULL;
+        }
+        gpio_set_level(INDICATOR_2_PIN, 0);
         xTaskCreate(startup_buzz, "Dial error", 1024, NULL, 5, NULL);
         return;
     }
@@ -41,13 +72,6 @@ static void add_digit_to_dialing(uint8_t digit) {
     // Log the current assembled phone number
     ESP_LOGI("DIALER", "Current number: %s", phone_number_str);
 }
-static void clear_dialing_number() {
-    phone_number_current_writing = 0;
-    for (int i = 0; i < sizeof(phone_number_dialing)/sizeof(phone_number_dialing[0]); i++) {
-        phone_number_dialing[i] = 0;
-    }
-}
-
 static void red_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "RED_BUTTON_SINGLE_RELEASE");
@@ -80,7 +104,6 @@ static void white_1_button_single_release_cb(void *arg,void *usr_data)
 static void white_2_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_2_BUTTON_SINGLE_CLICK");
-    esp_hf_client_dial("0000000000");
 }
 static void white_2_button_single_release_cb(void *arg,void *usr_data)
 {
@@ -89,7 +112,6 @@ static void white_2_button_single_release_cb(void *arg,void *usr_data)
 static void white_3_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_3_BUTTON_SINGLE_CLICK");
-    esp_hf_client_dial("0000000000");
 }
 static void white_3_button_single_release_cb(void *arg,void *usr_data)
 {
@@ -154,6 +176,7 @@ static void rotary_on_single_click_cb(void *arg,void *usr_data) {
 static void rotary_on_single_release_cb(void *arg,void *usr_data) {
     // ESP_LOGI(MY_TAG, "ROTARY_ON_SINGLE_RELEASE");
     ESP_LOGI(MY_TAG, "ROTARY_TICK_COUNT: %d", rotary_tick_count % 10);
+    vTaskDelay(pdMS_TO_TICKS(500));
     add_digit_to_dialing(rotary_tick_count % 10);
     rotary_tick_count = 0;
     rotary_state = 0;
@@ -209,14 +232,15 @@ void stop_ringing_timer(void) {
 static void startup_buzz(void *arg) {
     for (int i = 0; i < 2; i++) {
         gpio_set_level(INDICATOR_1_PIN, 1);
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(300));
         gpio_set_level(INDICATOR_1_PIN, 0);
         gpio_set_level(INDICATOR_2_PIN, 1);
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(600));
         gpio_set_level(INDICATOR_2_PIN, 0);
-        gpio_set_level(BUZZER_PIN, 1);
-        vTaskDelay(pdMS_TO_TICKS(200));
-        gpio_set_level(BUZZER_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(600));
+        // gpio_set_level(BUZZER_PIN, 1);
+        // vTaskDelay(pdMS_TO_TICKS(200));
+        // gpio_set_level(BUZZER_PIN, 0);
     }
     vTaskDelete(NULL);
 }
