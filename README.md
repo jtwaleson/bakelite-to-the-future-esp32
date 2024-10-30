@@ -9,3 +9,5 @@ This is a project based on [ESP IDFs Hands-Free Profile (HFP HF) example reposit
 For the story and more pictures check my [blog post](https://blog.waleson.com/2024/10/bakelite-to-future-1950s-rotary-phone.html)
 
 Have fun hacking!
+
+Note: the code I wrote is pretty crap so ignore that please 😂
