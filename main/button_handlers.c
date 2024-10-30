@@ -139,14 +139,23 @@ static void black_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "BLACK_BUTTON_SINGLE_RELEASE");
 }
-static void horn_lift_button_slam_cb(void *arg,void *usr_data)
-{
+static void horn_lift_button_slam_cb_safe(void *arg) {
+    vTaskDelay(pdMS_TO_TICKS(200));
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_SLAM");
     esp_hf_client_reject_call();
     esp_hf_client_stop_voice_recognition();
+    pickup_handle = NULL;
+    vTaskDelete(NULL);
 }
-static void horn_lift_button_lift_cb(void *arg,void *usr_data)
+static void horn_lift_button_slam_cb(void *arg,void *usr_data)
 {
+    if (pickup_handle) {
+        vTaskDelete(pickup_handle);
+    }
+    xTaskCreate(horn_lift_button_slam_cb_safe, "LIFT HORN", 4096, NULL, 5, &pickup_handle);
+}
+static void horn_lift_button_lift_cb_safe(void *arg) {
+    vTaskDelay(pdMS_TO_TICKS(200));
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_LIFT");
     stop_ringing_timer();
     // TODO set a timer to accept or auto reject if slammed
@@ -167,6 +176,16 @@ static void horn_lift_button_lift_cb(void *arg,void *usr_data)
         ESP_LOGI("DIALER", "Starting voice recognition");
         esp_hf_client_start_voice_recognition();
     }
+    pickup_handle = NULL;
+    vTaskDelete(NULL);
+
+}
+static void horn_lift_button_lift_cb(void *arg,void *usr_data)
+{
+    if (pickup_handle) {
+        vTaskDelete(pickup_handle);
+    }
+    xTaskCreate(horn_lift_button_lift_cb_safe, "LIFT HORN", 4096, NULL, 5, &pickup_handle);
 }
 static void rotary_on_single_click_cb(void *arg,void *usr_data) {
     // ESP_LOGI(MY_TAG, "ROTARY_ON_SINGLE_CLICK");
