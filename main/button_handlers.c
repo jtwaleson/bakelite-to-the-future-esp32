@@ -9,6 +9,7 @@
 #include "esp_hf_client_api.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "globals.h"
 
 static uint8_t rotary_state = 0;
 static bool is_ringing = false;
@@ -17,7 +18,7 @@ static uint8_t phone_number_dialing[16];
 static uint8_t phone_number_current_writing = 0;
 
 static TaskHandle_t dialing_handle = NULL;
-static uint8_t amount_of_ticks_left = 0;
+static int amount_of_ticks_left = 0;
 static TaskHandle_t pickup_handle = NULL;
 
 extern esp_bd_addr_t peer_addr;
@@ -25,7 +26,11 @@ extern esp_bd_addr_t peer_addr;
 esp_bd_addr_t laptop_addr = BAKELITE_LAPTOP_MAC;
 esp_bd_addr_t phone_addr = BAKELITE_PHONE_MAC;
 
+bool audio_connected = false;
+bool bt_connected = false;
+
 static void clear_dialing_number() {
+    amount_of_ticks_left = 0;
     phone_number_current_writing = 0;
     for (int i = 0; i < sizeof(phone_number_dialing)/sizeof(phone_number_dialing[0]); i++) {
         phone_number_dialing[i] = 0;
@@ -44,6 +49,11 @@ static void start_dialing_routine(void *arg) {
     vTaskDelete(NULL);
 }
 static void add_digit_to_dialing(uint8_t digit) {
+    if (audio_connected) {
+        ESP_LOGI(MY_TAG, "SENDING DTMF %c", '0' + digit);
+        esp_hf_client_send_dtmf('0' + digit);
+        return;
+    }
     amount_of_ticks_left = 15;
     if (!dialing_handle) {
         xTaskCreate(start_dialing_routine, "DialingNumbers", 2048, NULL, configMAX_PRIORITIES - 3, &dialing_handle);
@@ -89,21 +99,39 @@ static void red_button_single_click_cb(void *arg,void *usr_data)
         ESP_ERROR_CHECK(esp_hf_client_connect(peer_addr));
     }
 }
+static void fuse(void *arg) {
+    if (is_ringing) {
+        stop_ringing_timer();
+    } else {
+        vTaskDelay(pdMS_TO_TICKS(10000));
+        start_ringing_timer();
+    }
+    vTaskDelete(NULL);
+}
 static void white_1_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_1_BUTTON_SINGLE_CLICK");
-    gpio_set_level(BUZZER_PIN, 1);
+    if (audio_connected) {
+        ESP_LOGI(MY_TAG, "SENDING DTMF *");
+        esp_hf_client_send_dtmf('*');
+        return;
+    }
+    xTaskCreate(fuse, "START FUSE", 2048, NULL, 5, NULL);
 }
 static void white_1_button_single_release_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_1_BUTTON_SINGLE_RELEASE");
     ESP_LOGI(MY_TAG, "Clearing memory num");
-    gpio_set_level(BUZZER_PIN, 0);
     clear_dialing_number();
 }
 static void white_2_button_single_click_cb(void *arg,void *usr_data)
 {
     ESP_LOGI(MY_TAG, "WHITE_2_BUTTON_SINGLE_CLICK");
+    if (audio_connected) {
+        ESP_LOGI(MY_TAG, "SENDING DTMF #");
+        esp_hf_client_send_dtmf('#');
+        return;
+    }
 }
 static void white_2_button_single_release_cb(void *arg,void *usr_data)
 {
@@ -141,15 +169,21 @@ static void black_button_single_release_cb(void *arg,void *usr_data)
 }
 static void horn_lift_button_slam_cb_safe(void *arg) {
     vTaskDelay(pdMS_TO_TICKS(200));
+    amount_of_ticks_left = 0;
+    if (dialing_handle != NULL) {
+        vTaskDelete(dialing_handle);
+        dialing_handle = NULL;
+    }
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_SLAM");
     esp_hf_client_reject_call();
     esp_hf_client_stop_voice_recognition();
+    esp_hf_client_disconnect_audio(peer_addr);
     pickup_handle = NULL;
     vTaskDelete(NULL);
 }
 static void horn_lift_button_slam_cb(void *arg,void *usr_data)
 {
-    if (pickup_handle) {
+    if (pickup_handle != NULL) {
         vTaskDelete(pickup_handle);
     }
     xTaskCreate(horn_lift_button_slam_cb_safe, "LIFT HORN", 4096, NULL, 5, &pickup_handle);
@@ -158,8 +192,15 @@ static void horn_lift_button_lift_cb_safe(void *arg) {
     vTaskDelay(pdMS_TO_TICKS(200));
     ESP_LOGI(MY_TAG, "HORN_LIFT_BUTTON_LIFT");
     stop_ringing_timer();
+    amount_of_ticks_left = 0;
+    if (dialing_handle != NULL) {
+        vTaskDelete(dialing_handle);
+        dialing_handle = NULL;
+    }
+    ESP_LOGI(MY_TAG, "AUDIO CONNECTED STATE %d", audio_connected);
     // TODO set a timer to accept or auto reject if slammed
-    if (phone_number_current_writing > 1) {
+    if (phone_number_current_writing > 0) {
+        gpio_set_level(INDICATOR_2_PIN, 0);
         ESP_LOGI("DIALER", "Dialing");
         char phone_number_str[17]; // 16 digits + null terminator
         for (int i = 0; i < phone_number_current_writing; i++) {
@@ -167,12 +208,21 @@ static void horn_lift_button_lift_cb_safe(void *arg) {
         }
         phone_number_str[phone_number_current_writing] = '\0'; // Null-terminate the string
         ESP_LOGI("DIALER", "Dialing %s", phone_number_str);
-        esp_hf_client_dial(phone_number_str);
+        if (phone_number_current_writing == 1) {
+            // dial favorite
+            esp_hf_client_dial_memory(phone_number_dialing[0]);
+        } else {
+            esp_hf_client_dial(phone_number_str);
+        }
         clear_dialing_number();
     } else if (is_ringing) {
+        gpio_set_level(INDICATOR_2_PIN, 0);
         ESP_LOGI("DIALER", "Answering call");
         esp_hf_client_answer_call();
+    } else if (audio_connected) {
+        ESP_LOGI("DIALER", "Audio was already active, not taking any action");
     } else {
+        gpio_set_level(INDICATOR_2_PIN, 0);
         ESP_LOGI("DIALER", "Starting voice recognition");
         esp_hf_client_start_voice_recognition();
     }
@@ -182,7 +232,7 @@ static void horn_lift_button_lift_cb_safe(void *arg) {
 }
 static void horn_lift_button_lift_cb(void *arg,void *usr_data)
 {
-    if (pickup_handle) {
+    if (pickup_handle != NULL) {
         vTaskDelete(pickup_handle);
     }
     xTaskCreate(horn_lift_button_lift_cb_safe, "LIFT HORN", 4096, NULL, 5, &pickup_handle);

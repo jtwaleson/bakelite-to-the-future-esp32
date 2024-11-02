@@ -28,6 +28,7 @@
 
 #include "driver/gpio.h"
 #include "button_handlers.h"
+#include "globals.h"
 
 const char *c_hf_evt_str[] = {
     "CONNECTION_STATE_EVT",              /*!< connection state changed event */
@@ -243,8 +244,10 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
         {
             if (param->conn_stat.state == 2) {
                 ESP_LOGI("JOUKE", "CONNECTION_STATE_EVT: CONNECTED");
+                bt_connected = true;
                 gpio_set_level(INDICATOR_1_PIN, 1);
             } else if (param->conn_stat.state == 0) {
+                bt_connected = false;
                 ESP_LOGI("JOUKE", "CONNECTION_STATE_EVT: DISCONNECTED");
                 gpio_set_level(INDICATOR_1_PIN, 0);
             }
@@ -263,9 +266,11 @@ void bt_app_hf_client_cb(esp_hf_client_cb_event_t event, esp_hf_client_cb_param_
             if (param->audio_stat.state == 2 || param->audio_stat.state == 3) {
                 // TODO set an interval
                 ESP_LOGI("JOUKE", "AUDIO_STATE_EVT: CONNECTED");
+                audio_connected = true;
                 gpio_set_level(INDICATOR_2_PIN, 1);
             } else if (param->audio_stat.state == 0) {
                 ESP_LOGI("JOUKE", "AUDIO_STATE_EVT: DISCONNECTED");
+                audio_connected = false;
                 gpio_set_level(INDICATOR_2_PIN, 0);
             }
     #if CONFIG_BT_HFP_AUDIO_DATA_PATH_HCI
